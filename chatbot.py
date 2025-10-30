@@ -83,7 +83,7 @@ def show_chatbot():
         "What is your monthly applicant income?",
         "What is your monthly co-applicant income?",
         "What is the loan amount you are requesting?",
-        "What is the loan term in months?",
+        "What is the loan term in days?",
         "What is your credit history score? (300-850)",
         "What is the area ? (Urban/Semiurban/Rural)"
     ]

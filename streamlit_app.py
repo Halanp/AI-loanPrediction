@@ -186,5 +186,3 @@ def sidebar_layout():
 
 # Set initial page state if not defined
 sidebar_layout()
-#ufy7tfy
-#lknj,
