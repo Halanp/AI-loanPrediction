@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Eligibility Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .chat-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            max-height: 600px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+
+        .user-message {
+            background: #e3f2fd;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+
+        .assistant-message {
+            background: #f5f5f5;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+
+        .system-message {
+            background: #fff3e0;
+            margin: 0 auto;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        input {
+            padding: 14px;
+            flex: 1;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            background: #f8f9fa;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            background: white;
+        }
+
+        button {
+            padding: 14px 25px;
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .eligible {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+        }
+
+        .not-eligible {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .typing-indicator {
+            display: none;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            max-width: 80%;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .chat-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Loan Prediction Chatbot</h1>
+        
+        <div class="chat-container" id="chatContainer">
+            <div class="message assistant-message">
+                Hello! I'm your loan eligibility assistant. Are you ready to begin? (Yes/No)
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Your answer..." autocomplete="off">
+            <button id="sendButton">Send</button>
+        </div>
+        
+        <div id="resultBox" class="result-box"></div>
+    </div>
+
+    <script>
+        // DOM elements
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const resultBox = document.getElementById('resultBox');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Add message to chat
+        function addMessage(content, role) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}-message`;
+            messageDiv.textContent = content;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Show/hide typing indicator
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        // Process user input
+        async function processInput() {
+            const input = userInput.value.trim();
+            if (!input) return;
+            
+            // Add user message to chat
+            addMessage(input, 'user');
+            userInput.value = '';
+            sendButton.disabled = true;
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: input })
+                });
+                
+                const data = await response.json();
+                
+                // Hide typing indicator
+                hideTypingIndicator();
+                
+                // Update chat with all messages from server
+                chatContainer.innerHTML = '';
+                data.messages.forEach(msg => {
+                    addMessage(msg.content, msg.role);
+                });
+                
+                // Show result if completed
+                if (data.completed) {
+                    showFinalResult(data.messages);
+                }
+                
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage('Error: Could not connect to server', 'assistant');
+                console.error('Error:', error);
+            } finally {
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Show final result in the result box
+        function showFinalResult(messages) {
+            // Find the last assistant message which should contain the final result
+            const lastAssistantMessage = messages.reverse().find(msg => msg.role === 'assistant');
+            
+            if (lastAssistantMessage) {
+                const content = lastAssistantMessage.content;
+                
+                if (content.includes('Congratulations') || content.includes('approved')) {
+                    resultBox.innerHTML = `
+                        <h3>🎉 Congratulations! Your loan application is likely approved!</h3>
+                        <p>Based on the information you provided, you appear to be eligible for the loan.</p>
+                        <p><strong>Next Steps:</strong></p>
+                        <ul>
+                            <li>Prepare your identification documents</li>
+                            <li>Submit proof of income</li>
+                            <li>Complete the loan application form</li>
+                            <li>Wait for final approval (typically 3-5 business days)</li>
+                        </ul>
+                    `;
+                    resultBox.className = 'result-box eligible';
+                } else {
+                    resultBox.innerHTML = `
+                        <h3>⚠️ Your loan application needs improvement</h3>
+                        <p>Based on the information you provided, you may not meet all eligibility criteria at this time.</p>
+                        <p><strong>Suggestions to improve eligibility:</strong></p>
+                        <ul>
+                            <li>Increase your income or add a co-applicant with higher income</li>
+                            <li>Improve your credit score</li>
+                            <li>Reduce the requested loan amount</li>
+                            <li>Consider a longer loan term</li>
+                        </ul>
+                    `;
+                    resultBox.className = 'result-box not-eligible';
+                }
+                
+                resultBox.style.display = 'block';
+            }
+        }
+
+        // Reset chat function (you can add a reset button if needed)
+        async function resetChat() {
+            try {
+                const response = await fetch('/reset', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                // Clear chat and reset UI
+                chatContainer.innerHTML = '';
+                resultBox.style.display = 'none';
+                addMessage("Hello! I'm your loan eligibility assistant. Are you ready to begin? (Yes/No)", 'assistant');
+                
+            } catch (error) {
+                console.error('Error resetting chat:', error);
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', processInput);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') processInput();
+        });
+
+        // Focus on input field
+        userInput.focus();
+    </script>
+</body>
+</html>

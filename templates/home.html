@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #eae6e6;
+        }
+        
+        .intro {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        .about-link {
+            display: inline-block;
+            margin: 20px auto;
+            text-decoration: none;
+            color: white;
+            background: #3498db;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: Arial Narrow Bold;
+            font-size: 1.1rem;
+            transition: background 0.3s ease;
+        }
+        .about-link:hover {
+            background: #217dbb;
+        }
+        
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 30px auto;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin: 40px 0 20px 0;
+            font-size: 1.8rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            border-radius: 2px;
+        }
+        
+        strong {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #3f7fbc 0%, #161313be 100%);
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Loan Prediction System</h1>
+        <p class="intro">This system helps you determine your eligibility for a loan based on various financial and personal factors.</p>
+        
+        <a href="/about" class="about-link">About us</a>
+        
+        <img src="loan.png" alt="Loan Prediction System" width="600">
+
+        <h2>🛠️ Project Overview</h2>
+        <div class="highlight">
+            <p>This project was developed as part of my <strong>AI internship</strong> at <strong>Infosys Springboard</strong>. The objective was to build a <strong>Loan Prediction System</strong> that uses machine learning to predict whether a loan application will be approved or rejected based on various parameters like personal and financial details of the applicant.</p>
+            <p>The system takes the user's input and processes it through a pre-trained model to deliver a prediction about the loan status. We used algorithms like <strong>Logistic Regression</strong> and <strong>Decision Trees</strong> for accurate predictions.</p>
+        </div>
+    </div>
+</body>
+</html>

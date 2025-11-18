@@ -2,51 +2,71 @@ from flask import Flask, request, render_template
 from markupsafe import escape
 import pickle
 import numpy as np
+import google.generativeai as genai
+
 
 app = Flask(__name__)
 model = pickle.load(open('model.pkl', 'rb'))
 
+genai.configure(api_key='AIzaSyDeMZy0c-tgxHdhdTBXp9h7CGQo3tVAq_Q')
+
 @app.route('/')
+def land():
+    return render_template('landing.html')
+
+@app.route('/home')
 def home():
+    return render_template('home.html')
+
+@app.route('/index')
+def index():
     return render_template('index.html')
 
-@app.route('/predict', methods=['GET','POST']) #get - to fetch data, post - to send data. That is used to show blank predict page or result page. Post used to submit the form
+@app.route('/about')
+def about():
+    return render_template('about_us.html')
+
+
+
+
+@app.route('/predict', methods = ["GET","POST"]) #get - typically used to show a blank prediction page or result page. #post-used to submit the form with input values that the server uses to make a prediction.
 def predict():
     if request.method == 'POST':
         gender = request.form['gender']
         married = request.form['married']
         dependents = request.form['dependents']
         education = request.form['education']
-        self_employed = request.form['self_employed']
-        credit = float(request.form['credit'])
-        ApplicantIncome = int(request.form['ApplicantIncome'])
+        employed = request.form['employed']
+        credit  = float(request.form['credit'])
+        area = request.form['area']
+        ApplicantIncome = float(request.form['ApplicantIncome']) #25000-> 0,1
         CoapplicantIncome = float(request.form['CoapplicantIncome'])
         LoanAmount = float(request.form['LoanAmount'])
         Loan_Amount_Term = float(request.form['Loan_Amount_Term'])
-        area = request.form['area']
+
 
         #gender
-        if (gender == 'Male'):
+        if (gender == "Male"):
             male = 1
         else:
             male = 0
         
         #married
-        if (married == 'Yes'):
+        if (married == "Yes"):
             married_yes = 1
         else:
             married_yes = 0
-
+        
         #dependents
-        if (dependents == '1'):
+        if ( dependents == '1'):
             dependents_1 = 1
             dependents_2 = 0
             dependents_3 = 0
-        elif (dependents == '2'):
+        elif dependents == '2':
             dependents_1 = 0
             dependents_2 = 1
             dependents_3 = 0
-        elif (dependents == '+3'):
+        elif dependents == '3+':
             dependents_1 = 0
             dependents_2 = 0
             dependents_3 = 1
@@ -55,37 +75,37 @@ def predict():
             dependents_2 = 0
             dependents_3 = 0
 
-        #education
-        if (education == 'Not Graduate'):
+        #education 
+        if education =="Not Graduate":
             not_graduate = 1
         else:
             not_graduate = 0
 
-        #self_employed
-        if (self_employed == 'Yes'):
-            self_employed_yes = 1
+        #employed
+        if (employed == "Yes"):
+            employed_yes = 1
         else:
-            self_employed_yes = 0   
-
-        #prperty area
-        if (area == 'Semiurban'):
+            employed_yes = 0
+        
+        #property area
+        if area == "Semiurban":
             semiurban = 1
             urban = 0
-        elif (area == 'Urban'):
+        elif area == "Urban":
             semiurban = 0
             urban = 1
         else:
             semiurban = 0
             urban = 0
 
-        ApplicantIncome = np.log(ApplicantIncome)
-        totalincomelog = np.log(ApplicantIncome + CoapplicantIncome)
-        LoanAmountlog = np.log(LoanAmount)
+        ApplicantIncomeLog = np.log(ApplicantIncome)
+        totalincomelog = np.log(ApplicantIncome+CoapplicantIncome)
+        LoanAmountLog = np.log(LoanAmount)
         Loan_Amount_Termlog = np.log(Loan_Amount_Term)
 
-        prediction = model.predict([[credit,ApplicantIncome,totalincomelog,LoanAmountlog,Loan_Amount_Termlog,male,married_yes,dependents_1,dependents_2,dependents_3,not_graduate,self_employed_yes,semiurban,urban]])
-
-        #print (prediction)
+        prediction = model.predict([[credit,ApplicantIncomeLog,LoanAmountLog,Loan_Amount_Termlog,totalincomelog,male,married_yes,dependents_1,dependents_2,dependents_3,not_graduate,employed_yes,semiurban,urban]])
+        
+        #print(prediction)
         if(prediction=="N"):
             prediction = "No"
         else:
@@ -95,7 +115,6 @@ def predict():
         return render_template("prediction.html")
 if __name__ == "__main__":
     app.run(debug=True)
-    
 
         
        
