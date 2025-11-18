@@ -10,9 +10,110 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'loan-pred-chatbot-secret-key-2024'
-
+model = pickle.load(open('model.pkl', 'rb'))
 # Configure Gemini
 genai.configure(api_key='AIzaSyDeMZy0c-tgxHdhdTBXp9h7CGQo3tVAq_Q')
+
+@app.route('/')
+def land():
+    return render_template('landing.html')
+
+@app.route('/home')
+def home():
+    return render_template('home.html')
+
+@app.route('/index')
+def index():
+    return render_template('index.html')
+
+@app.route('/about')
+def about():
+    return render_template('about_us.html')
+
+@app.route('/predict', methods = ["GET","POST"]) #get - typically used to show a blank prediction page or result page. #post-used to submit the form with input values that the server uses to make a prediction.
+def predict():
+    if request.method == 'POST':
+        gender = request.form['gender']
+        married = request.form['married']
+        dependents = request.form['dependents']
+        education = request.form['education']
+        employed = request.form['employed']
+        credit  = float(request.form['credit'])
+        area = request.form['area']
+        ApplicantIncome = float(request.form['ApplicantIncome']) #25000-> 0,1
+        CoapplicantIncome = float(request.form['CoapplicantIncome'])
+        LoanAmount = float(request.form['LoanAmount'])
+        Loan_Amount_Term = float(request.form['Loan_Amount_Term'])
+
+
+        #gender
+        if (gender == "Male"):
+            male = 1
+        else:
+            male = 0
+        
+        #married
+        if (married == "Yes"):
+            married_yes = 1
+        else:
+            married_yes = 0
+        
+        #dependents
+        if ( dependents == '1'):
+            dependents_1 = 1
+            dependents_2 = 0
+            dependents_3 = 0
+        elif dependents == '2':
+            dependents_1 = 0
+            dependents_2 = 1
+            dependents_3 = 0
+        elif dependents == '3+':
+            dependents_1 = 0
+            dependents_2 = 0
+            dependents_3 = 1
+        else:
+            dependents_1 = 0
+            dependents_2 = 0
+            dependents_3 = 0
+
+        #education 
+        if education =="Not Graduate":
+            not_graduate = 1
+        else:
+            not_graduate = 0
+
+        #employed
+        if (employed == "Yes"):
+            employed_yes = 1
+        else:
+            employed_yes = 0
+        
+        #property area
+        if area == "Semiurban":
+            semiurban = 1
+            urban = 0
+        elif area == "Urban":
+            semiurban = 0
+            urban = 1
+        else:
+            semiurban = 0
+            urban = 0
+
+        ApplicantIncomeLog = np.log(ApplicantIncome)
+        totalincomelog = np.log(ApplicantIncome+CoapplicantIncome)
+        LoanAmountLog = np.log(LoanAmount)
+        Loan_Amount_Termlog = np.log(Loan_Amount_Term)
+
+        prediction = model.predict([[credit,ApplicantIncomeLog,LoanAmountLog,Loan_Amount_Termlog,totalincomelog,male,married_yes,dependents_1,dependents_2,dependents_3,not_graduate,employed_yes,semiurban,urban]])
+        
+        #print(prediction)
+        if(prediction=="N"):
+            prediction = "No"
+        else:
+            prediction = "Yes"
+        return render_template("prediction.html",prediction_text="loan status is {}".format(prediction))
+    else:
+        return render_template("prediction.html")
 
 def initialize_session_state():
     if "messages" not in session:
@@ -75,8 +176,8 @@ def preprocess_data(gender, married, dependents, education, employed, credit, ar
         print(f"Error in preprocessing: {str(e)}")
         return None
 
-@app.route('/')
-def index():
+@app.route('/chatpage')
+def chatpage():
     initialize_session_state()
     return render_template('chat.html')
 
@@ -86,6 +187,12 @@ def chat():
     
     # Initialize session state if not exists
     initialize_session_state()
+    # Ensure current_step is an int to avoid type errors when comparing
+    try:
+        current_step = int(session.get("current_step", -1))
+    except Exception:
+        current_step = -1
+        session["current_step"] = current_step
     
     # Define questions
     questions = [
@@ -104,7 +211,7 @@ def chat():
     
     response_data = {
         "messages": [],
-        "current_step": session["current_step"],
+        "current_step": current_step,
         "completed": False
     }
     
@@ -118,7 +225,8 @@ def chat():
         
         if user_input.lower() == "yes":
             session["started"] = True
-            session["current_step"] = 0
+            current_step = 0
+            session["current_step"] = current_step
             session["messages"].append({
                 "role": "assistant",
                 "content": "Great! Let's get started with your loan eligibility assessment:\n\nWhat is your gender? (Male/Female)",
@@ -132,14 +240,14 @@ def chat():
             })
     
     # Handle questionnaire responses
-    elif session["current_step"] < len(questions):
+    elif current_step < len(questions):
         # Add user response to messages and store it
         session["messages"].append({
             "role": "user", 
             "content": user_input,
             "timestamp": datetime.now().strftime("%H:%M")
         })
-        session["responses"][session["current_step"]] = user_input
+        session["responses"][str(current_step)] = user_input
 
         # Validate input
         valid_input = True
@@ -163,11 +271,12 @@ def chat():
                 error_message = "Please enter a valid credit score."
 
         if valid_input:
-            session["current_step"] += 1
-            if session["current_step"] < len(questions):
+            current_step += 1
+            session["current_step"] = current_step
+            if current_step < len(questions):
                 session["messages"].append({
                     "role": "assistant",
-                    "content": questions[session["current_step"]],
+                    "content": questions[current_step],
                     "timestamp": datetime.now().strftime("%H:%M")
                 })
         else:
@@ -178,23 +287,24 @@ def chat():
             })
     
     # Process final results
-    if session["started"] and session["current_step"] == len(questions):
+    if session["started"] and current_step == len(questions):
         try:
             # Get all responses
-            responses = session["responses"]
+            responses = session.get("responses", {})
             
             # Extract all inputs
-            gender = responses[0]
-            married = responses[1]
-            dependents = responses[2]
-            education = responses[3]
-            self_employed = responses[4]
-            applicant_income = responses[5]
-            coapplicant_income = responses[6]
-            loan_amount = responses[7]
-            loan_amount_term = responses[8]
-            credit_history = responses[9]
-            property_area = responses[10]
+            # Responses stored as string keys to avoid type issues with session serialization
+            gender = responses.get('0') or responses.get(0)
+            married = responses.get('1') or responses.get(1)
+            dependents = responses.get('2') or responses.get(2)
+            education = responses.get('3') or responses.get(3)
+            self_employed = responses.get('4') or responses.get(4)
+            applicant_income = responses.get('5') or responses.get(5)
+            coapplicant_income = responses.get('6') or responses.get(6)
+            loan_amount = responses.get('7') or responses.get(7)
+            loan_amount_term = responses.get('8') or responses.get(8)
+            credit_history = responses.get('9') or responses.get(9)
+            property_area = responses.get('10') or responses.get(10)
 
             # Display captured information
             captured_info = f"""Here is the information you provided:
@@ -308,12 +418,12 @@ Please evaluate the above details and provide a comprehensive analysis of my loa
             print(error_msg)
     
     # Update session
+    session["current_step"] = current_step
     session.modified = True
     
     # Prepare response
     response_data["messages"] = session["messages"]
-    response_data["current_step"] = session["current_step"]
-    
+    response_data["current_step"] = current_step
     return jsonify(response_data)
 
 @app.route('/reset', methods=['POST'])

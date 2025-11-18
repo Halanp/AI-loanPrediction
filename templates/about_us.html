@@ -86,21 +86,12 @@
             font-size: 1.05rem;
             line-height: 1.6;
         }
-        
         .image-placeholder {
-            display: block;
-            width: 100%;
-            height: 300px;
-            margin: 25px auto;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #3498db, #2c3e50);
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            justify-content: center;          
         }
+
         
         .highlight-box {
             background-color: #f8f9fa;
@@ -163,7 +154,7 @@
             <li><strong>Visualization & Output</strong>: The result is displayed to the user in a clear format with feedback on whether the loan is likely to be approved or rejected.</li>
         </ol>
         <div class="image-placeholder">
-            System Architecture Diagram
+            <img src="{{ url_for('static', filename='system_architecture.png') }}" alt="System Architecture Diagram" style="width: 642px; height: 416px; object-fit:cover; border-radius:8px;">
         </div>
     </section>
 
@@ -181,7 +172,7 @@
             <p>This project has provided me with hands-on experience in <strong>data preprocessing</strong>, <strong>model training</strong>, and <strong>AI deployment</strong>, which are essential skills for any AI professional.</p>
         </div>
         <div class="image-placeholder">
-            Project Activity Diagram
+            <img src="{{ url_for('static', filename='Project Activity.png') }}" alt="Project Activity Diagram" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
         </div>
     </section>
 </body>
