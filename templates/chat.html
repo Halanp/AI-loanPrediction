@@ -233,6 +233,7 @@
         <div class="input-container">
             <input type="text" id="userInput" placeholder="Your answer..." autocomplete="off">
             <button id="sendButton">Send</button>
+            <button id="resetButton">Reset</button>
         </div>
         
         <div id="resultBox" class="result-box"></div>
@@ -243,6 +244,7 @@
         const chatContainer = document.getElementById('chatContainer');
         const userInput = document.getElementById('userInput');
         const sendButton = document.getElementById('sendButton');
+        const resetButton = document.getElementById('resetButton');
         const resultBox = document.getElementById('resultBox');
         const typingIndicator = document.getElementById('typingIndicator');
 
@@ -375,6 +377,7 @@
 
         // Event listeners
         sendButton.addEventListener('click', processInput);
+        resetButton.addEventListener('click', resetChat);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') processInput();
         });

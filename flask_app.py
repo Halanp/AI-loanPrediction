@@ -10,7 +10,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'loan-pred-chatbot-secret-key-2024'
-model = pickle.load(open('model.pkl', 'rb'))
+model = pickle.load(open("C:\\Users\\hp\\Desktop\\AI- POWER LOAN\\model.pkl",'rb'))
 # Configure Gemini
 genai.configure(api_key='AIzaSyDeMZy0c-tgxHdhdTBXp9h7CGQo3tVAq_Q')
 
